@@ -1,9 +1,17 @@
 import React from "react";
+
+import { Button, ButtonGroup } from '@progress/kendo-react-buttons';
+import { ComboBox, ComboBoxChangeEvent } from '@progress/kendo-react-dropdowns';
+
 import { DashboardFilter, DashboardRepository } from "../../repositories/dashboard.repository";
 import { formatDateEnUs } from "../../../../core/helpers/date-utils";
 import { ActiveIssuesComponent } from "../../components/active-issues/active-issues";
 import { DashboardService } from "../../services/dashboard.service";
 import { StatusCounts } from "../../models";
+import { PtUser } from "../../../../core/models/domain";
+import { Store } from "../../../../core/state/app-store";
+import { Observable } from "rxjs";
+import { PtUserService } from "../../../../core/services/pt-user-service";
 
 
 interface DateRange {
@@ -14,13 +22,17 @@ interface DateRange {
 interface DashboardPageState {
     statusCounts: StatusCounts;
     filter: DashboardFilter;
+    users: PtUser[];
 }
 
 export class DashboardPage extends React.Component<any, DashboardPageState> {
 
+    private store: Store = new Store();
     private dashboardRepo: DashboardRepository = new DashboardRepository();
     private dashboardService: DashboardService = new DashboardService(this.dashboardRepo);
-    public filter: DashboardFilter = {};
+    private ptUserService: PtUserService = new PtUserService(this.store);
+
+    public users$: Observable<PtUser[]> = this.store.select<PtUser[]>('users');
 
     constructor(props: any) {
         super(props);
@@ -31,21 +43,30 @@ export class DashboardPage extends React.Component<any, DashboardPageState> {
                 closedItemsCount: 0,
                 openItemsCount: 0
             },
-            filter: {}
+            filter: {},
+            users: []
         };
     }
 
     public componentDidMount() {
+        this.users$.subscribe(users => {
+            this.setState({
+                users: users
+            });
+        });
         this.refresh();
+    }
+
+    public componentDidUpdate(prevProps: any, prevState: DashboardPageState) {
+        if (this.state.filter.userId !== prevState.filter.userId ||
+            this.state.filter.dateStart !== prevState.filter.dateStart ||
+            this.state.filter.dateEnd !== prevState.filter.dateEnd) {
+            this.refresh();
+        }
     }
 
     private onMonthRangeTap(months: number) {
         const range = this.getDateRange(months);
-        this.filter = {
-            userId: this.filter.userId,
-            dateEnd: range.dateEnd,
-            dateStart: range.dateStart
-        };
         this.setState({
             filter: {
                 userId: this.state.filter.userId,
@@ -53,7 +74,6 @@ export class DashboardPage extends React.Component<any, DashboardPageState> {
                 dateStart: range.dateStart
             }
         });
-        this.refresh();
     }
 
     private getDateRange(months: number): DateRange {
@@ -67,12 +87,40 @@ export class DashboardPage extends React.Component<any, DashboardPageState> {
     }
 
     private refresh() {
-        this.dashboardService.getStatusCounts(this.filter)
+        this.dashboardService.getStatusCounts(this.state.filter)
             .then(result => {
                 this.setState({
                     statusCounts: result
                 });
             });
+    }
+
+    public userFilterOpen() {
+        this.ptUserService.fetchUsers();
+    }
+
+    private filterItemRender(li: any, itemProps: any) {
+        const userItem = itemProps.dataItem as PtUser;
+        const renderedRow = (
+            <div className="row" style={{ marginLeft: 5 }}>
+                <img className="li-avatar rounded mx-auto d-block" src={userItem.avatar} />
+                <span style={{ marginLeft: 5 }}>{userItem.fullName}</span>
+            </div>
+        );
+        return React.cloneElement(li, li.props, renderedRow);
+    }
+
+    public userFilterValueChange(e: ComboBoxChangeEvent) {
+        const user = e.target.value;
+        if (user) {
+            this.setState({
+                filter: { ...this.state.filter, userId: user!.id }
+            });
+        } else {
+            this.setState({
+                filter: { ...this.state.filter, userId: undefined }
+            });
+        }
     }
 
     public render() {
@@ -94,9 +142,16 @@ export class DashboardPage extends React.Component<any, DashboardPageState> {
 
                     <div className="btn-toolbar mb-2 mb-md-0">
                         <div className="btn-group mr-2">
-                            <button type="button" className="btn btn-sm btn-outline-secondary" onClick={(e) => this.onMonthRangeTap(3)}>3 Months</button>
-                            <button type="button" className="btn btn-sm btn-outline-secondary" onClick={(e) => this.onMonthRangeTap(6)}>6 Months</button>
-                            <button type="button" className="btn btn-sm btn-outline-secondary" onClick={(e) => this.onMonthRangeTap(12)}>1 Year</button>
+
+                            <ComboBox data={this.state.users} itemRender={this.filterItemRender} textField="fullName"
+                                dataItemKey="id" onOpen={() => this.userFilterOpen()} onChange={(e) => this.userFilterValueChange(e)} style={{ width: 250 }} />
+
+                            <ButtonGroup>
+                                <Button type="button" look="flat" icon="calendar" onClick={(e) => this.onMonthRangeTap(3)}>3 Months</Button>
+                                <Button type="button" look="flat" icon="calendar" onClick={(e) => this.onMonthRangeTap(6)}>6 Months</Button>
+                                <Button type="button" look="flat" icon="calendar" onClick={(e) => this.onMonthRangeTap(12)}>1 Year</Button>
+                            </ButtonGroup>
+
                         </div >
 
                     </div >

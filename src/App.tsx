@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { BrowserRouter, Route, Redirect, Switch } from 'react-router-dom';
 
 import './App.css';
+import '@progress/kendo-theme-default/dist/all.css';
 
 import { BacklogPage } from './modules/backlog/pages/backlog/backlog-page';
 import { DashboardPage } from './modules/dashboard/pages/dashboard/dashboard-page';
