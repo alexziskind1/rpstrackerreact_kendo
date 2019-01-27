@@ -2,7 +2,8 @@ import React from "react";
 
 import { Modal, ModalBody, ModalFooter } from "reactstrap";
 import { Button } from "@progress/kendo-react-buttons";
-import { Grid, GridColumn, GridRowClickEvent } from '@progress/kendo-react-grid';
+import { Grid, GridColumn, GridRowClickEvent, GridPageChangeEvent } from '@progress/kendo-react-grid';
+import { SortDescriptor, orderBy, State, process } from '@progress/kendo-data-query';
 
 import { BacklogService } from "../../services/backlog.service";
 import { BacklogRepository } from "../../repositories/backlog.repository";
@@ -13,7 +14,6 @@ import { ItemType } from "../../../../core/constants";
 
 import './backlog-page.css';
 
-
 import { AppPresetFilter } from "../../../../shared/components/preset-filter/preset-filter";
 
 import { PtNewItem } from "../../../../shared/models/dto/pt-new-item";
@@ -21,12 +21,13 @@ import { EMPTY_STRING } from "../../../../core/helpers";
 import { getIndicatorClass } from "../../../../shared/helpers/priority-styling";
 
 
-
 interface BacklogPageState {
     currentPreset: PresetType;
     items: PtItem[];
     showAddModal: boolean;
     newItem: PtNewItem;
+    skip: number;
+    take: number;
 }
 
 export class BacklogPage extends React.Component<any, BacklogPageState> {
@@ -45,7 +46,9 @@ export class BacklogPage extends React.Component<any, BacklogPageState> {
             currentPreset: preset ? preset : 'open',
             items: [],
             showAddModal: false,
-            newItem: this.initModalNewItem()
+            newItem: this.initModalNewItem(),
+            skip: 0,
+            take: 10
         };
     }
 
@@ -132,7 +135,16 @@ export class BacklogPage extends React.Component<any, BacklogPageState> {
         this.props.history.push(`/detail/${selItem.id}`);
     }
 
+    public onPageChange(event: GridPageChangeEvent) {
+        this.setState({
+            skip: event.page.skip,
+            take: event.page.take
+        });
+    }
+
     public render() {
+
+        const gridData = this.state.items.slice(this.state.skip, this.state.take + this.state.skip);
 
         return (
             <React.Fragment>
@@ -147,7 +159,12 @@ export class BacklogPage extends React.Component<any, BacklogPageState> {
                     </div>
                 </div>
 
-                <Grid data={this.state.items} style={{ height: '400px' }} onRowClick={(e) => this.onSelectionChange(e)}>
+                <Grid data={gridData} style={{ height: '400px' }} onRowClick={(e) => this.onSelectionChange(e)}
+                    skip={this.state.skip}
+                    take={this.state.take}
+                    total={this.state.items.length}
+                    pageable={true}
+                    onPageChange={(e) => this.onPageChange(e)}>
                     <GridColumn field="type" title=" " width={40}
                         cell={(props) => (
                             <td>
