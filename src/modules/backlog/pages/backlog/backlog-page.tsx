@@ -2,7 +2,7 @@ import React from "react";
 
 import { Modal, ModalBody, ModalFooter } from "reactstrap";
 import { Button } from "@progress/kendo-react-buttons";
-import { Grid, GridColumn, GridRowClickEvent, GridPageChangeEvent, GridSortChangeEvent } from '@progress/kendo-react-grid';
+import { Grid, GridColumn, GridRowClickEvent, GridPageChangeEvent, GridSortChangeEvent, GridDataStateChangeEvent } from '@progress/kendo-react-grid';
 import { SortDescriptor, orderBy, State, process } from '@progress/kendo-data-query';
 
 import { BacklogService } from "../../services/backlog.service";
@@ -26,9 +26,10 @@ interface BacklogPageState {
     items: PtItem[];
     showAddModal: boolean;
     newItem: PtNewItem;
-    skip: number;
-    take: number;
-    sort: SortDescriptor[];
+    //skip: number;
+    //take: number;
+    //sort: SortDescriptor[];
+    gridState: State;
 }
 
 export class BacklogPage extends React.Component<any, BacklogPageState> {
@@ -48,11 +49,17 @@ export class BacklogPage extends React.Component<any, BacklogPageState> {
             items: [],
             showAddModal: false,
             newItem: this.initModalNewItem(),
-            skip: 0,
-            take: 10,
-            sort: [
-                { field: 'title', dir: 'asc' }
-            ]
+            //skip: 0,
+            //take: 10,
+            //sort: [
+            //    { field: 'title', dir: 'asc' }
+            //],
+            gridState: {
+                skip: 0,
+                take: 10,
+                sort: [],
+                group: []
+            }
         };
     }
 
@@ -139,6 +146,7 @@ export class BacklogPage extends React.Component<any, BacklogPageState> {
         this.props.history.push(`/detail/${selItem.id}`);
     }
 
+    /*
     public onPageChange(event: GridPageChangeEvent) {
         this.setState({
             skip: event.page.skip,
@@ -151,10 +159,18 @@ export class BacklogPage extends React.Component<any, BacklogPageState> {
             sort: event.sort
         });
     }
+    */
+
+    public onDataStateChange(e: GridDataStateChangeEvent) {
+        this.setState({
+            gridState: e.data
+        });
+    }
 
     public render() {
 
-        const gridData = orderBy(this.state.items.slice(this.state.skip, this.state.take + this.state.skip), this.state.sort);
+        //const gridData = orderBy(this.state.items.slice(this.state.skip, this.state.take + this.state.skip), this.state.sort);
+        const gridData = process(this.state.items, this.state.gridState);
 
         return (
             <React.Fragment>
@@ -170,14 +186,19 @@ export class BacklogPage extends React.Component<any, BacklogPageState> {
                 </div>
 
                 <Grid data={gridData} style={{ height: '400px' }} onRowClick={(e) => this.onSelectionChange(e)}
-                    skip={this.state.skip}
-                    take={this.state.take}
-                    total={this.state.items.length}
+                    take={this.state.gridState.take}
+                    skip={this.state.gridState.skip}
+
+                    //skip={this.state.skip}
+                    //take={this.state.take}
+                    //total={this.state.items.length}
                     pageable={true}
-                    onPageChange={(e) => this.onPageChange(e)}
+                    //onPageChange={(e) => this.onPageChange(e)}
                     sortable={true}
-                    sort={this.state.sort}
-                    onSortChange={(e) => this.onSortChange(e)}
+                    //sort={this.state.sort}
+                    //onSortChange={(e) => this.onSortChange(e)}
+                    sort={this.state.gridState.sort}
+                    onDataStateChange={(e) => this.onDataStateChange(e)}
                 >
                     <GridColumn field="type" title=" " width={40}
                         cell={(props) => (
