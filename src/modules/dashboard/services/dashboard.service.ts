@@ -1,4 +1,4 @@
-import { DashboardRepository, DashboardFilter } from '../repositories/dashboard.repository';
+import { DashboardRepository, DashboardFilter, FilteredIssues } from '../repositories/dashboard.repository';
 import { TypeCounts, PriorityCounts, StatusCounts } from '../models';
 
 export class DashboardService {
@@ -17,5 +17,9 @@ export class DashboardService {
 
     public getTypeCounts(filter: DashboardFilter): Promise<TypeCounts> {
         return this.repo.getTypeCounts(filter);
+    }
+
+    public getFilteredIssues(filter: DashboardFilter): Promise<FilteredIssues> {
+        return this.repo.getFilteredIssues(filter);
     }
 }

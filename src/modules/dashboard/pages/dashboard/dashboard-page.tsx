@@ -3,7 +3,7 @@ import React from "react";
 import { Button, ButtonGroup } from '@progress/kendo-react-buttons';
 import { ComboBox, ComboBoxChangeEvent } from '@progress/kendo-react-dropdowns';
 
-import { DashboardFilter, DashboardRepository } from "../../repositories/dashboard.repository";
+import { DashboardFilter, DashboardRepository, FilteredIssues } from "../../repositories/dashboard.repository";
 import { formatDateEnUs } from "../../../../core/helpers/date-utils";
 import { ActiveIssuesComponent } from "../../components/active-issues/active-issues";
 import { DashboardService } from "../../services/dashboard.service";
@@ -12,7 +12,7 @@ import { PtUser } from "../../../../core/models/domain";
 import { Store } from "../../../../core/state/app-store";
 import { Observable } from "rxjs";
 import { PtUserService } from "../../../../core/services/pt-user-service";
-
+import { DashboardChart } from "./dashboard-chart";
 
 interface DateRange {
     dateStart: Date;
@@ -23,6 +23,7 @@ interface DashboardPageState {
     statusCounts: StatusCounts;
     filter: DashboardFilter;
     users: PtUser[];
+    issuesAll: FilteredIssues;
 }
 
 export class DashboardPage extends React.Component<any, DashboardPageState> {
@@ -44,7 +45,11 @@ export class DashboardPage extends React.Component<any, DashboardPageState> {
                 openItemsCount: 0
             },
             filter: {},
-            users: []
+            users: [],
+            issuesAll: {
+                categories: [],
+                items: []
+            }
         };
     }
 
@@ -87,12 +92,17 @@ export class DashboardPage extends React.Component<any, DashboardPageState> {
     }
 
     private refresh() {
-        this.dashboardService.getStatusCounts(this.state.filter)
-            .then(result => {
-                this.setState({
-                    statusCounts: result
-                });
+
+        Promise.all<StatusCounts, FilteredIssues>([
+            this.dashboardService.getStatusCounts(this.state.filter),
+            this.dashboardService.getFilteredIssues(this.state.filter)
+        ]
+        ).then(results => {
+            this.setState({
+                statusCounts: results[0],
+                issuesAll: results[1]
             });
+        });
     }
 
     public userFilterOpen() {
@@ -167,6 +177,8 @@ export class DashboardPage extends React.Component<any, DashboardPageState> {
                         <div className="row">
                             <div className="col-sm-12">
                                 <h3>All issues</h3>
+
+                                <DashboardChart issuesAll={this.state.issuesAll} />
 
                             </div>
                         </div>
