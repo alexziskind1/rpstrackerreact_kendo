@@ -1,5 +1,7 @@
 import React from "react";
 
+import { TabStrip, TabStripTab } from '@progress/kendo-react-layout';
+
 import { PtItem, PtUser, PtTask, PtComment } from "../../../../core/models/domain";
 import { DetailScreenType } from "../../../../shared/models/ui/types/detail-screens";
 import { Store } from "../../../../core/state/app-store";
@@ -7,13 +9,13 @@ import { BacklogRepository } from "../../repositories/backlog.repository";
 import { BacklogService } from "../../services/backlog.service";
 import { PtItemDetailsComponent } from "../../components/item-details/pt-item-details";
 import { PtItemTasksComponent } from "../../components/item-tasks/pt-item-tasks";
-import { debug } from "util";
 import { PtUserService } from "../../../../core/services/pt-user-service";
 import { Observable, BehaviorSubject } from "rxjs";
 import { PtNewTask } from "../../../../shared/models/dto/pt-new-task";
 import { PtTaskUpdate } from "../../../../shared/models/dto/pt-task-update";
 import { PtItemChitchatComponent } from "../../components/item-chitchat/pt-item-chitchat";
 import { PtNewComment } from "../../../../shared/models/dto/pt-new-comment";
+import './detail-page.css';
 
 interface DetailPageState {
     item: PtItem | undefined;
@@ -32,6 +34,15 @@ export class DetailPage extends React.Component<any, DetailPageState> {
     public tasks$: BehaviorSubject<PtTask[]> = new BehaviorSubject<PtTask[]>([]);
     public comments$: BehaviorSubject<PtComment[]> = new BehaviorSubject<PtComment[]>([]);
     public currentUser: PtUser | undefined;
+
+    private screenPositionMap: { [key in DetailScreenType | number]: number | DetailScreenType } = {
+        0: 'details',
+        1: 'tasks',
+        2: 'chitchat',
+        'details': 0,
+        'tasks': 1,
+        'chitchat': 2
+    };
 
     constructor(props: any) {
         super(props);
@@ -66,6 +77,14 @@ export class DetailPage extends React.Component<any, DetailPageState> {
     }
 
     public onScreenSelected(screen: DetailScreenType) {
+        this.setState({
+            selectedDetailsScreen: screen
+        });
+        this.props.history.push(`/detail/${this.itemId}/${screen}`);
+    }
+
+    public onTabSelect(e: any) {
+        const screen = this.screenPositionMap[(e.selected as number)] as DetailScreenType;
         this.setState({
             selectedDetailsScreen: screen
         });
@@ -130,21 +149,9 @@ export class DetailPage extends React.Component<any, DetailPageState> {
         this.ptUserService.fetchUsers();
     }
 
-    private screenRender(screen: DetailScreenType, item: PtItem) {
-        switch (screen) {
-            case 'details':
-                return <PtItemDetailsComponent item={item} users$={this.users$} usersRequested={() => this.onUsersRequested()} itemSaved={(item) => this.onItemSaved(item)} />;
-            case 'tasks':
-                return <PtItemTasksComponent tasks$={this.tasks$} addNewTask={(newTask) => this.onAddNewTask(newTask)} updateTask={(taskUpdate) => this.onUpdateTask(taskUpdate)} />;
-            case 'chitchat':
-                return <PtItemChitchatComponent comments$={this.comments$} currentUser={this.currentUser!} addNewComment={(newComment) => this.onAddNewComment(newComment)} />;
-
-            default:
-                return <PtItemDetailsComponent item={item} users$={this.users$} usersRequested={() => this.onUsersRequested()} itemSaved={(item) => this.onItemSaved(item)} />;
-        }
+    public getSelectedTabNum() {
+        return this.screenPositionMap[this.state.selectedDetailsScreen] as number;
     }
-
-
 
     public render() {
         const item = this.state.item;
@@ -156,19 +163,20 @@ export class DetailPage extends React.Component<any, DetailPageState> {
 
             <div>
                 <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
-                    <h1 className="h2">{item.title}</h1>
-                    <div className="btn-toolbar mb-2 mb-md-0">
-                        <div className="btn-group mr-2">
-                            <button type="button" onClick={(e) => this.onScreenSelected('details')} className={'btn btn-sm btn-outline-secondary ' + this.state.selectedDetailsScreen === 'details' ? 'active' : ''}>Details</button>
-
-                            <button type="button" onClick={(e) => this.onScreenSelected('tasks')} className={"btn btn-sm btn-outline-secondary " + this.state.selectedDetailsScreen === 'tasks' ? 'active' : ''}>Tasks</button>
-
-                            <button type="button" onClick={(e) => this.onScreenSelected('chitchat')} className={"btn btn-sm btn-outline-secondary " + this.state.selectedDetailsScreen === 'chitchat' ? 'active' : ''}>Chitchat</button>
-                        </div>
-                    </div>
+                    <h1 className="h2"><span className="k-icon k-i-edit"></span> {item.title}</h1>
                 </div>
 
-                {this.screenRender(this.state.selectedDetailsScreen, item)}
+                <TabStrip onSelect={(e) => this.onTabSelect(e)} selected={this.getSelectedTabNum()}>
+                    <TabStripTab title="Details">
+                        <PtItemDetailsComponent item={item} users$={this.users$} usersRequested={() => this.onUsersRequested()} itemSaved={(item) => this.onItemSaved(item)} />
+                    </TabStripTab>
+                    <TabStripTab title="Tasks">
+                        <PtItemTasksComponent tasks$={this.tasks$} addNewTask={(newTask) => this.onAddNewTask(newTask)} updateTask={(taskUpdate) => this.onUpdateTask(taskUpdate)} />
+                    </TabStripTab>
+                    <TabStripTab title="Chitchat">
+                        <PtItemChitchatComponent comments$={this.comments$} currentUser={this.currentUser!} addNewComment={(newComment) => this.onAddNewComment(newComment)} />
+                    </TabStripTab>
+                </TabStrip>
 
             </div>
         );
