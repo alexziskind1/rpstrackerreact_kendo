@@ -174,7 +174,7 @@ export class PtItemDetailsComponent extends React.Component<PtItemDetailsCompone
                     <div className="form-group row">
                         <label className="col-sm-2 col-form-label">Estimate</label>
                         <div className="col-sm-10">
-                            <input className="form-control" type="range" step="1" min="0" max="20" value={itemForm.estimate} onChange={(e) => this.onNonTextFieldChange(e, 'estimate')} name="estimate" />
+                            <input className="form-control" type="range" step="1" min="0" max="20" value={itemForm.estimate} onChange={(e) => this.onNonTextFieldChange(e, 'estimate')} name="estimate" style={{ width: 300 }} />
                         </div>
                     </div>
 
