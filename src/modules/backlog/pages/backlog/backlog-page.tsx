@@ -1,4 +1,9 @@
 import React from "react";
+
+import { Modal, ModalBody, ModalFooter } from "reactstrap";
+import { Button } from "@progress/kendo-react-buttons";
+import { Grid, GridColumn, GridRowClickEvent } from '@progress/kendo-react-grid';
+
 import { BacklogService } from "../../services/backlog.service";
 import { BacklogRepository } from "../../repositories/backlog.repository";
 import { Store } from "../../../../core/state/app-store";
@@ -10,11 +15,11 @@ import './backlog-page.css';
 
 
 import { AppPresetFilter } from "../../../../shared/components/preset-filter/preset-filter";
-import { Modal, ModalBody, ModalFooter } from "reactstrap";
+
 import { PtNewItem } from "../../../../shared/models/dto/pt-new-item";
 import { EMPTY_STRING } from "../../../../core/helpers";
 import { getIndicatorClass } from "../../../../shared/helpers/priority-styling";
-import { Button } from "@progress/kendo-react-buttons";
+
 
 
 interface BacklogPageState {
@@ -122,34 +127,12 @@ export class BacklogPage extends React.Component<any, BacklogPageState> {
         };
     }
 
+    public onSelectionChange(args: GridRowClickEvent) {
+        const selItem = args.dataItem as PtItem;
+        this.props.history.push(`/detail/${selItem.id}`);
+    }
+
     public render() {
-
-        const rows = this.state.items.map(i => {
-            return (
-                <tr key={i.id} className="pt-table-row" onClick={(e) => this.listItemTap(i)}>
-                    <td>
-                        <img src={this.getIndicatorImage(i)} className="backlog-icon" />
-                    </td>
-                    <td>
-                        <img src={i.assignee.avatar} className="li-avatar rounded mx-auto d-block" />
-                    </td>
-                    <td>
-                        <span className="li-title">{i.title}</span>
-                    </td>
-
-                    <td>
-                        <span>{i.status}</span>
-                    </td>
-
-                    <td>
-                        <span className={'badge ' + this.getPriorityClass(i)}>{i.priority}
-                        </span>
-                    </td>
-                    <td><span className="li-estimate">{i.estimate}</span></td>
-                    <td><span className="li-date">{i.dateCreated.toDateString()}</span></td>
-                </tr>
-            );
-        });
 
         return (
             <React.Fragment>
@@ -164,24 +147,45 @@ export class BacklogPage extends React.Component<any, BacklogPageState> {
                     </div>
                 </div>
 
-                <div className="table-responsive">
-                    <table className="table table-striped table-sm table-hover">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>Assignee</th>
-                                <th>Title</th>
-                                <th>Status</th>
-                                <th>Priority</th>
-                                <th>Estimate</th>
-                                <th>Created</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {rows}
-                        </tbody>
-                    </table>
-                </div>
+                <Grid data={this.state.items} style={{ height: '400px' }} onRowClick={(e) => this.onSelectionChange(e)}>
+                    <GridColumn field="type" title=" " width={40}
+                        cell={(props) => (
+                            <td>
+                                <img src={this.getIndicatorImage(props.dataItem)} className="backlog-icon" />
+                            </td>
+                        )} />
+
+                    <GridColumn field="assignee" title="Assignee" width={260}
+                        cell={(props) => (
+                            <td>
+                                <div>
+                                    <img src={props.dataItem.assignee.avatar} className="li-avatar rounded mx-auto" />
+                                    <span style={{ marginLeft: 10 }}>{props.dataItem.assignee.fullName}</span>
+                                </div>
+                            </td>
+                        )} />
+
+                    <GridColumn field="title" title="Title" />
+
+                    <GridColumn field="priority" title="Priority" width={100}
+                        cell={(props) => (
+                            <td>
+                                <span className={'badge ' + this.getPriorityClass(props.dataItem)}>{props.dataItem.priority}</span>
+                            </td>
+                        )} />
+
+                    <GridColumn field="estimate" title="Estimate" width={100} />
+
+                    <GridColumn field="dateCreated" title="Created" width={160} filter="date"
+                        cell={(props) => (
+                            <td>
+                                <span className="li-date">{props.dataItem.dateCreated.toDateString()}</span>
+                            </td>
+                        )}
+                    />
+
+                </Grid>
+
 
                 <Modal isOpen={this.state.showAddModal} toggle={() => this.toggleModal()} className={this.props.className}>
                     <div className="modal-header">
