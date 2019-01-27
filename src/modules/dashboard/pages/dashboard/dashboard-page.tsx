@@ -157,10 +157,23 @@ export class DashboardPage extends React.Component<any, DashboardPageState> {
                     </div >
                 </div >
 
-                <ActiveIssuesComponent statusCounts={this.state.statusCounts} />
+
+                <div className="card">
+                    <h3 className="card-header">Active Issues</h3>
+                    <div className="card-block">
+
+                        <ActiveIssuesComponent statusCounts={this.state.statusCounts} />
+
+                        <div className="row">
+                            <div className="col-sm-12">
+                                <h3>All issues</h3>
+
+                            </div>
+                        </div>
+                    </div>
+                </div >
 
             </div >
-
         );
     }
 }
