@@ -8,11 +8,12 @@ import { ItemType } from "../../../../core/constants";
 
 import './backlog-page.css';
 
-import { getIndicatorClass } from "../../../../core/models/domain/enums/priority-helpers";
+
 import { AppPresetFilter } from "../../../../shared/components/preset-filter/preset-filter";
 import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from "reactstrap";
 import { PtNewItem } from "../../../../shared/models/dto/pt-new-item";
 import { EMPTY_STRING } from "../../../../core/helpers";
+import { getIndicatorClass } from "../../../../shared/helpers/priority-styling";
 
 
 interface BacklogPageState {

@@ -1,4 +1,4 @@
-import { PriorityEnum } from "./";
+import { PriorityEnum } from "../../core/models/domain/enums";
 
 export function getIndicatorClass(priority: PriorityEnum): string {
     switch (priority) {
