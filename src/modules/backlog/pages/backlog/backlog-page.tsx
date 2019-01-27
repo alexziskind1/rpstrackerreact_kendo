@@ -2,7 +2,7 @@ import React from "react";
 
 import { Modal, ModalBody, ModalFooter } from "reactstrap";
 import { Button } from "@progress/kendo-react-buttons";
-import { Grid, GridColumn, GridRowClickEvent, GridPageChangeEvent } from '@progress/kendo-react-grid';
+import { Grid, GridColumn, GridRowClickEvent, GridPageChangeEvent, GridSortChangeEvent } from '@progress/kendo-react-grid';
 import { SortDescriptor, orderBy, State, process } from '@progress/kendo-data-query';
 
 import { BacklogService } from "../../services/backlog.service";
@@ -28,6 +28,7 @@ interface BacklogPageState {
     newItem: PtNewItem;
     skip: number;
     take: number;
+    sort: SortDescriptor[];
 }
 
 export class BacklogPage extends React.Component<any, BacklogPageState> {
@@ -48,7 +49,10 @@ export class BacklogPage extends React.Component<any, BacklogPageState> {
             showAddModal: false,
             newItem: this.initModalNewItem(),
             skip: 0,
-            take: 10
+            take: 10,
+            sort: [
+                { field: 'title', dir: 'asc' }
+            ]
         };
     }
 
@@ -142,9 +146,15 @@ export class BacklogPage extends React.Component<any, BacklogPageState> {
         });
     }
 
+    public onSortChange(event: GridSortChangeEvent) {
+        this.setState({
+            sort: event.sort
+        });
+    }
+
     public render() {
 
-        const gridData = this.state.items.slice(this.state.skip, this.state.take + this.state.skip);
+        const gridData = orderBy(this.state.items.slice(this.state.skip, this.state.take + this.state.skip), this.state.sort);
 
         return (
             <React.Fragment>
@@ -164,7 +174,11 @@ export class BacklogPage extends React.Component<any, BacklogPageState> {
                     take={this.state.take}
                     total={this.state.items.length}
                     pageable={true}
-                    onPageChange={(e) => this.onPageChange(e)}>
+                    onPageChange={(e) => this.onPageChange(e)}
+                    sortable={true}
+                    sort={this.state.sort}
+                    onSortChange={(e) => this.onSortChange(e)}
+                >
                     <GridColumn field="type" title=" " width={40}
                         cell={(props) => (
                             <td>
