@@ -1,9 +1,13 @@
 import React from "react";
+import { Observable } from "rxjs";
+import { Modal, ModalBody, ModalFooter, Button } from "reactstrap";
+import { Input } from '@progress/kendo-react-inputs';
+
 import { PtItem, PtUser } from "../../../../core/models/domain";
 import { PtItemDetailsEditFormModel, ptItemToFormModel } from "../../../../shared/models/forms/pt-item-details-edit-form";
 import { ItemType, PT_ITEM_STATUSES, PT_ITEM_PRIORITIES } from "../../../../core/constants";
-import { Modal, ModalBody, ModalFooter, Button } from "reactstrap";
-import { Observable } from "rxjs";
+
+
 
 interface PtItemDetailsComponentProps {
     item: PtItem;
@@ -113,14 +117,16 @@ export class PtItemDetailsComponent extends React.Component<PtItemDetailsCompone
                     <div className="form-group row">
                         <label className="col-sm-2 col-form-label">Title</label>
                         <div className="col-sm-10">
-                            <input className="form-control" defaultValue={itemForm.title} onBlur={() => this.onBlurTextField()} onChange={(e) => this.onFieldChange(e, 'title')} name="title" />
+
+                            <Input label="Title" defaultValue={itemForm.title} onBlur={() => this.onBlurTextField()} onChange={(e) => this.onFieldChange(e, 'title')} name="title" style={{ width: '60%' }} />
+
                         </div>
                     </div>
 
                     <div className="form-group row">
                         <label className="col-sm-2 col-form-label">Description</label>
                         <div className="col-sm-10">
-                            <textarea className="form-control" defaultValue={itemForm.description} onBlur={() => this.onBlurTextField()} onChange={(e) => this.onFieldChange(e, 'description')} name="description"></textarea>
+                            <Input label="Description" multiple={true} defaultValue={itemForm.description} onBlur={() => this.onBlurTextField()} onChange={(e) => this.onFieldChange(e, 'description')} name="description" style={{ width: '60%', height: 100 }} />
                         </div>
                     </div>
 
