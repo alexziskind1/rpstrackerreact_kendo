@@ -10,10 +10,11 @@ import './backlog-page.css';
 
 
 import { AppPresetFilter } from "../../../../shared/components/preset-filter/preset-filter";
-import { Modal, ModalHeader, ModalBody, ModalFooter, Button } from "reactstrap";
+import { Modal, ModalBody, ModalFooter } from "reactstrap";
 import { PtNewItem } from "../../../../shared/models/dto/pt-new-item";
 import { EMPTY_STRING } from "../../../../core/helpers";
 import { getIndicatorClass } from "../../../../shared/helpers/priority-styling";
+import { Button } from "@progress/kendo-react-buttons";
 
 
 interface BacklogPageState {
@@ -158,7 +159,7 @@ export class BacklogPage extends React.Component<any, BacklogPageState> {
                         <AppPresetFilter selectedPreset={this.state.currentPreset} onSelectPresetTap={(p) => this.onSelectPresetTap(p)} />
 
                         <div className="btn-group mr-2">
-                            <button type="button" className="btn btn-sm btn-outline-secondary" onClick={() => this.toggleModal()}>Add</button>
+                            <Button type="button" icon="plus" onClick={() => this.toggleModal()}>Add</Button>
                         </div>
                     </div>
                 </div>
