@@ -19,6 +19,7 @@ import { AppPresetFilter } from "../../../../shared/components/preset-filter/pre
 import { PtNewItem } from "../../../../shared/models/dto/pt-new-item";
 import { EMPTY_STRING } from "../../../../core/helpers";
 import { getIndicatorClass } from "../../../../shared/helpers/priority-styling";
+import { Input } from "@progress/kendo-react-inputs";
 
 
 interface BacklogPageState {
@@ -249,16 +250,14 @@ export class BacklogPage extends React.Component<any, BacklogPageState> {
                     <ModalBody>
                         <form>
                             <div className="form-group row">
-                                <label className="col-sm-2 col-form-label">Title</label>
-                                <div className="col-sm-10">
-                                    <input className="form-control" defaultValue={this.state.newItem.title} onChange={(e) => this.onFieldChange(e, 'title')} name="title" />
+                                <div className="col-sm-12">
+                                    <Input label="Title" defaultValue={this.state.newItem.title} onChange={(e) => this.onFieldChange(e, 'title')} name="title" style={{ width: '100%' }} />
                                 </div>
                             </div>
 
                             <div className="form-group row">
-                                <label className="col-sm-2 col-form-label">Description</label>
-                                <div className="col-sm-10">
-                                    <textarea className="form-control" defaultValue={this.state.newItem.description} onChange={(e) => this.onFieldChange(e, 'description')} name="description"></textarea>
+                                <div className="col-sm-12">
+                                    <Input label="Description" defaultValue={this.state.newItem.description} onChange={(e) => this.onFieldChange(e, 'description')} name="description" style={{ width: '100%', height: 100 }} />
                                 </div>
                             </div>
 
