@@ -3,7 +3,7 @@ import { Observable } from "rxjs";
 import { Modal, ModalBody, ModalFooter } from "reactstrap";
 import { Input } from '@progress/kendo-react-inputs';
 
-import { DropDownList } from '@progress/kendo-react-dropdowns';
+import { DropDownList, ListItemProps } from '@progress/kendo-react-dropdowns';
 
 import { PtItem, PtUser } from "../../../../core/models/domain";
 import { PtItemDetailsEditFormModel, ptItemToFormModel } from "../../../../shared/models/forms/pt-item-details-edit-form";
@@ -121,7 +121,7 @@ export class PtItemDetailsComponent extends React.Component<PtItemDetailsCompone
         return React.cloneElement(li, li.props, itemTypeRow);
     }
 
-    private priorityRender(li: any, itemProps: any) {
+    private priorityRender(li: any, itemProps: ListItemProps) {
         const dataItem = itemProps.dataItem;
         const priorityRow = (
             <span className={'badge ' + getIndicatorClass(dataItem)}>{dataItem}</span>
@@ -182,7 +182,7 @@ export class PtItemDetailsComponent extends React.Component<PtItemDetailsCompone
                         <label className="col-sm-2 col-form-label">Priority</label>
                         <div className="col-sm-10">
 
-                            <DropDownList data={this.prioritiesProvider} itemRender={this.priorityRender} defaultValue={itemForm.priorityStr} onChange={(e) => this.onNonTextFieldChange(e, 'priorityStr')} name="priority" />
+                            <DropDownList data={this.prioritiesProvider} itemRender={(li, props) => this.priorityRender(li, props)} defaultValue={itemForm.priorityStr} onChange={(e) => this.onNonTextFieldChange(e, 'priorityStr')} name="priority" />
 
                         </div>
                     </div>

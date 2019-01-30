@@ -124,7 +124,7 @@ export class DashboardPage extends React.Component<any, DashboardPageState> {
         const user = e.target.value;
         if (user) {
             this.setState({
-                filter: { ...this.state.filter, userId: user!.id }
+                filter: { ...this.state.filter, userId: user.id }
             });
         } else {
             this.setState({
