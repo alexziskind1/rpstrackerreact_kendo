@@ -164,7 +164,7 @@ export class BacklogPage extends React.Component<any, BacklogPageState> {
 
     public onDataStateChange(e: GridDataStateChangeEvent) {
         this.setState({
-            gridState: e.data
+            gridState: e.dataState
         });
     }
 
